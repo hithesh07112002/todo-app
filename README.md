@@ -43,8 +43,8 @@ flutter run
 The default server URL is `http://localhost:3000`. To select another address,
 pass `--dart-define=API_BASE_URL=http://<host>:3000` to `flutter run`. For the
 Android emulator, use `http://10.0.2.2:3000`. For a physical device, use the
-development computer's LAN IP and ensure both devices can reach it. The Android
-manifest currently permits cleartext HTTP for local development; use HTTPS in
+development computer's LAN IP and ensure both devices can reach it. Android
+allows cleartext HTTP only in debug builds for local development; use HTTPS in
 production.
 
 Each user can set a display name from the person icon. Names are self-reported
