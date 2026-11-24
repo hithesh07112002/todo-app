@@ -23,7 +23,7 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()));
 });
 
-test('creates tasks and broadcasts changes to connected clients', async () => {
+test('creates and updates tasks and broadcasts changes to connected clients', async () => {
   const { baseUrl, socketUrl } = await startTestServer();
   const socket = new WebSocket(socketUrl);
   const snapshotEvent = once(socket, 'message');
@@ -44,9 +44,34 @@ test('creates tasks and broadcasts changes to connected clients', async () => {
   assert.equal(response.status, 201);
   const task = await response.json();
   const [eventData] = await createdEvent;
-  assert.equal(JSON.parse(eventData.toString()).task.id, task.id);
+  const createEvent = JSON.parse(eventData.toString());
+  assert.equal(createEvent.type, 'task_created');
+  assert.equal(createEvent.task.id, task.id);
+  assert.equal(task.title, 'Review changes');
+  assert.equal(task.description, 'Check the shared list');
   assert.equal(task.status, 'pending');
   assert.equal(task.updatedBy, 'Alex');
+  assert.ok(Date.parse(task.createdAt));
+  assert.ok(Date.parse(task.updatedAt));
+
+  const updatedEvent = once(socket, 'message');
+  const updateResponse = await fetch(`${baseUrl}/api/tasks/${task.id}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Review complete',
+      description: 'Reviewed the shared list',
+      status: 'completed',
+      updatedBy: 'Sam',
+    }),
+  });
+  assert.equal(updateResponse.status, 200);
+  const [updatedData] = await updatedEvent;
+  const updateEvent = JSON.parse(updatedData.toString());
+  assert.equal(updateEvent.type, 'task_updated');
+  assert.equal(updateEvent.task.id, task.id);
+  assert.equal(updateEvent.task.status, 'completed');
+  assert.equal(updateEvent.task.updatedBy, 'Sam');
   socket.close();
   await once(socket, 'close');
 });

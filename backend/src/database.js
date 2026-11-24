@@ -1,10 +1,11 @@
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 
 export function createDatabase(databasePath = 'data/todos.sqlite') {
-  const db = new Database(databasePath);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
+  const db = new DatabaseSync(databasePath);
   db.exec(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA foreign_keys = ON;
+
     CREATE TABLE IF NOT EXISTS tasks (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -23,13 +24,12 @@ export function createDatabase(databasePath = 'data/todos.sqlite') {
   const insert = db.prepare(`
     INSERT INTO tasks
       (id, title, description, status, createdBy, updatedBy, createdAt, updatedAt)
-    VALUES
-      (@id, @title, @description, @status, @createdBy, @updatedBy, @createdAt, @updatedAt)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const update = db.prepare(`
-    UPDATE tasks SET title = @title, description = @description, status = @status,
-      updatedBy = @updatedBy, updatedAt = @updatedAt
-    WHERE id = @id
+    UPDATE tasks SET title = ?, description = ?, status = ?,
+      updatedBy = ?, updatedAt = ?
+    WHERE id = ?
   `);
   const remove = db.prepare('DELETE FROM tasks WHERE id = ?');
 
@@ -37,11 +37,27 @@ export function createDatabase(databasePath = 'data/todos.sqlite') {
     list: () => list.all(),
     get: (id) => get.get(id),
     create(task) {
-      insert.run(task);
+      insert.run(
+        task.id,
+        task.title,
+        task.description,
+        task.status,
+        task.createdBy,
+        task.updatedBy,
+        task.createdAt,
+        task.updatedAt,
+      );
       return get.get(task.id);
     },
     update(task) {
-      const result = update.run(task);
+      const result = update.run(
+        task.title,
+        task.description,
+        task.status,
+        task.updatedBy,
+        task.updatedAt,
+        task.id,
+      );
       return result.changes === 0 ? undefined : get.get(task.id);
     },
     remove(id) {

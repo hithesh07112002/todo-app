@@ -4,18 +4,51 @@ A Flutter task manager with a Node.js/SQLite backend and WebSocket-powered live
 updates. Connected clients share task creation, edits, status changes, and
 deletions.
 
+## Implemented requirements
+
+- **Todo CRUD:** create, edit, delete, and change a task's status between
+  Pending, In Progress, and Completed.
+- **Task fields:** the server stores an ID, title, description, status,
+  `createdBy`, `updatedBy`, `createdAt`, and `updatedAt` for every task.
+- **Real-time collaboration:** REST requests persist each change in SQLite;
+  WebSocket clients receive an initial snapshot and broadcasts for task
+  creation, updates, and deletion. The Flutter client reconnects and reloads
+  tasks after a dropped connection.
+- **Editor information:** task cards show who created and last updated each
+  task, along with creation and last-update timestamps.
+- **Live status chart:** a `fl_chart` pie chart and count labels are derived
+  from the synchronized task list.
+- **Print/export:** the report action creates a printable PDF with a status
+  chart and task list, including task descriptions and editor/timestamp data.
+- **State management and architecture:** Provider manages presentation state;
+  feature folders separate the task domain model, data/realtime repository,
+  presentation, and report generation.
+
+Display names are user-entered and self-reported; authentication is not part
+of this implementation.
+
 ## Requirements
 
 - Flutter SDK and Dart
-- Node.js 20 or newer
+- Node.js 22.5 or newer
 - npm
+
+On Windows, install Node.js LTS (which includes npm) with:
+
+```powershell
+winget install --id OpenJS.NodeJS.LTS --exact
+```
+
+Restart VS Code or open a new terminal after installation so the updated PATH
+is loaded. The commands below use `npm.cmd` to avoid PowerShell execution
+policies blocking the `npm.ps1` shim.
 
 ## Run the backend
 
 ```powershell
 cd backend
-npm install
-npm start
+npm.cmd install
+npm.cmd start
 ```
 
 By default, the API and WebSocket server listen on port `3000`, and the SQLite
@@ -65,7 +98,7 @@ Backend:
 
 - `express` for the HTTP API
 - `ws` for WebSocket connections and task event broadcasts
-- `better-sqlite3` for SQLite persistence
+- Node's built-in `node:sqlite` module for SQLite persistence
 - `cors` to allow a Flutter web client hosted on another origin
 
 ## Architecture
@@ -87,5 +120,5 @@ a snapshot before subsequent live events.
 flutter test
 flutter analyze
 cd backend
-npm test
+npm.cmd test
 ```

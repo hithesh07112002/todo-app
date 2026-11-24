@@ -21,6 +21,7 @@ class TodoController extends ChangeNotifier {
 
   List<Todo> get todos => List.unmodifiable(_todos);
   bool get isConnected => _isConnected;
+  bool get isConnecting => _isConnecting;
   bool get isLoading => _isLoading;
   String get displayName => _displayName;
   String? get error => _error;

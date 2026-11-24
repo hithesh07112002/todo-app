@@ -27,13 +27,26 @@ class CollaborativeTodoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shared Todo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF176B62),
-          surface: const Color(0xFFF7F8F5),
+          seedColor: const Color(0xFF28745C),
+          surface: const Color(0xFFF5F7F5),
         ),
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF7F8F5),
+        scaffoldBackgroundColor: const Color(0xFFF5F7F5),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
       ),
       home: const TodoPage(),
     );
