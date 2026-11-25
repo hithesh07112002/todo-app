@@ -16,7 +16,8 @@ RUN apt-get update \
 
 RUN git clone --depth 1 --branch "${FLUTTER_VERSION}" \
     https://github.com/flutter/flutter.git /opt/flutter
-ENV PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:${PATH}"
+ENV PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:${PATH}" \
+    TAR_OPTIONS="--no-same-owner"
 
 RUN flutter config --no-analytics --enable-web \
     && flutter precache --web \

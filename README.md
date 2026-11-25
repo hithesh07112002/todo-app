@@ -100,7 +100,8 @@ server. Express serves the Flutter files at `/`, REST endpoints at `/api`, and
 the WebSocket connection at `/ws` from the same origin. The frontend therefore
 does not need a separate API URL or cross-origin setup in production. The
 Docker build pins Flutter 3.50.1 (Dart 3.14.0) so its SDK satisfies the project's
-locked Flutter and Dart constraints.
+locked Flutter and Dart constraints. It also avoids restoring archive owner IDs
+that are incompatible with Render's build environment.
 
 **Free-host limitations:** Render Free services can sleep when idle and take
 time to wake on the next request. The SQLite database is stored on the
