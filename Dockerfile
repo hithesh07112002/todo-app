@@ -1,6 +1,28 @@
-FROM ghcr.io/cirruslabs/flutter:stable AS flutter-build
+FROM ubuntu:24.04 AS flutter-build
 
 WORKDIR /workspace
+ARG FLUTTER_VERSION=3.50.1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        libglu1-mesa \
+        unzip \
+        xz-utils \
+        zip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 --branch "${FLUTTER_VERSION}" \
+    https://github.com/flutter/flutter.git /opt/flutter
+ENV PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+RUN flutter config --no-analytics --enable-web \
+    && flutter precache --web \
+    && flutter --version \
+    && dart --version
+
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 COPY . .
