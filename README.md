@@ -90,9 +90,10 @@ actual Flutter website, Node API, and WebSocket from one Render URL:
 
 1. Push this repository to GitHub.
 2. In Render, choose **New → Blueprint**, connect this repository, and apply
-   the configuration in `render.yaml`.
+   the configuration in `render.yaml`. This creates a separate service named
+   `hithesh-collaborative-todo`; do not reuse an unrelated Django service.
 3. Wait for the Docker build and deployment to finish. Open the Render service
-   URL, typically `https://collaborative-todo-api.onrender.com`.
+   URL, typically `https://hithesh-collaborative-todo.onrender.com`.
 
 The root `Dockerfile` builds the Flutter web app and packages it with the Node
 server. Express serves the Flutter files at `/`, REST endpoints at `/api`, and
