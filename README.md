@@ -83,6 +83,38 @@ production.
 Each user can set a display name from the person icon. Names are self-reported
 and are not authenticated.
 
+## Publish a website
+
+The GitHub repository page shows the README and source code; it is not the
+running application. This project can publish the Flutter web app to GitHub
+Pages and its Node.js API/WebSocket service to Render.
+
+1. In Render, create a **Blueprint** from this repository and deploy
+   `render.yaml`. The free service URL will look like
+   `https://collaborative-todo-api.onrender.com`.
+2. In GitHub, open **Settings → Secrets and variables → Actions** and add a
+   repository secret named `TODO_API_BASE_URL`. Set its value to the Render
+   service URL, without a trailing slash.
+3. In GitHub, open **Settings → Pages** and set the build/deployment source to
+   **GitHub Actions**.
+4. Push to `main`, or manually run the **Deploy Flutter web app** workflow from
+   the Actions tab. The Pages URL will be shown in the workflow deployment
+   summary and usually has the form
+   `https://hithesh07112002.github.io/todo-app/`.
+
+The workflow builds Flutter with the repository's Pages path and embeds the
+Render API URL. The client uses HTTPS for REST and automatically connects to
+the corresponding secure WebSocket endpoint (`wss://.../ws`).
+
+**Free-host limitations:** Render Free services can sleep when idle and take
+time to wake on the next request. Their filesystem is ephemeral, so the SQLite
+database may be erased on restart or redeploy. This free configuration is
+suitable for a demo, not durable shared task storage. A persistent SQLite file
+requires a paid Render disk; alternatively, change the backend to a managed
+persistent database before choosing a free backend host. Display names are
+self-reported and the API currently has no authentication, so do not put
+sensitive tasks on the public demo.
+
 ## Packages
 
 Flutter:
