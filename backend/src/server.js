@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer as createHttpServer } from 'node:http';
 import cors from 'cors';
@@ -11,7 +11,11 @@ import { createDatabase } from './database.js';
 
 const statuses = new Set(['pending', 'in_progress', 'completed']);
 
-export function createTodoServer({ db, databasePath = 'data/todos.sqlite' } = {}) {
+export function createTodoServer({
+  db,
+  databasePath = 'data/todos.sqlite',
+  webRoot = process.env.WEB_ROOT,
+} = {}) {
   if (!db) {
     mkdirSync(dirname(databasePath), { recursive: true });
     db = createDatabase(databasePath);
@@ -92,6 +96,20 @@ export function createTodoServer({ db, databasePath = 'data/todos.sqlite' } = {}
     });
     response.status(204).end();
   });
+
+  if (webRoot) {
+    app.use(express.static(webRoot, { index: false }));
+    app.get('*', (request, response, next) => {
+      if (
+        request.path.startsWith('/api/') ||
+        request.path === '/health' ||
+        request.path === '/ws'
+      ) {
+        return next();
+      }
+      response.sendFile(join(webRoot, 'index.html'), next);
+    });
+  }
 
   app.use((error, _request, response, _next) => {
     if (error instanceof SyntaxError && 'body' in error) {

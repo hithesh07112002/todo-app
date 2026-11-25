@@ -1,15 +1,22 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { afterEach, test } from 'node:test';
 import { once } from 'node:events';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { WebSocket } from 'ws';
 
 import { createDatabase } from '../src/database.js';
 import { createTodoServer } from '../src/server.js';
 
 const servers = [];
+const temporaryDirectories = [];
 
-async function startTestServer() {
-  const todoServer = createTodoServer({ db: createDatabase(':memory:') });
+async function startTestServer({ webRoot } = {}) {
+  const todoServer = createTodoServer({
+    db: createDatabase(':memory:'),
+    webRoot,
+  });
   servers.push(todoServer);
   await todoServer.listen(0, '127.0.0.1');
   const address = todoServer.server.address();
@@ -21,6 +28,24 @@ async function startTestServer() {
 
 afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()));
+  for (const directory of temporaryDirectories.splice(0)) {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('serves the Flutter web app and API from one origin', async () => {
+  const webRoot = mkdtempSync(join(tmpdir(), 'collaborative-todo-web-'));
+  temporaryDirectories.push(webRoot);
+  writeFileSync(join(webRoot, 'index.html'), '<!doctype html><title>Todo</title>');
+  const { baseUrl } = await startTestServer({ webRoot });
+
+  const pageResponse = await fetch(baseUrl);
+  assert.equal(pageResponse.status, 200);
+  assert.match(await pageResponse.text(), /<title>Todo<\/title>/);
+
+  const tasksResponse = await fetch(`${baseUrl}/api/tasks`);
+  assert.equal(tasksResponse.status, 200);
+  assert.deepEqual(await tasksResponse.json(), []);
 });
 
 test('creates and updates tasks and broadcasts changes to connected clients', async () => {

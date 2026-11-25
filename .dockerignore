@@ -1,0 +1,13 @@
+.git
+.github
+.dart_tool
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub
+.idea
+.vscode
+build
+backend/node_modules
+backend/data
+**/node_modules
+**/build

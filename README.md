@@ -83,37 +83,29 @@ production.
 Each user can set a display name from the person icon. Names are self-reported
 and are not authenticated.
 
-## Publish a website
+## Publish the complete website on Render
 
-The GitHub repository page shows the README and source code; it is not the
-running application. This project can publish the Flutter web app to GitHub
-Pages and its Node.js API/WebSocket service to Render.
+The GitHub repository URL shows project files and the README. To serve the
+actual Flutter website, Node API, and WebSocket from one Render URL:
 
-1. In Render, create a **Blueprint** from this repository and deploy
-   `render.yaml`. The free service URL will look like
-   `https://collaborative-todo-api.onrender.com`.
-2. In GitHub, open **Settings → Secrets and variables → Actions** and add a
-   repository secret named `TODO_API_BASE_URL`. Set its value to the Render
-   service URL, without a trailing slash.
-3. In GitHub, open **Settings → Pages** and set the build/deployment source to
-   **GitHub Actions**.
-4. Push to `main`, or manually run the **Deploy Flutter web app** workflow from
-   the Actions tab. The Pages URL will be shown in the workflow deployment
-   summary and usually has the form
-   `https://hithesh07112002.github.io/todo-app/`.
+1. Push this repository to GitHub.
+2. In Render, choose **New → Blueprint**, connect this repository, and apply
+   the configuration in `render.yaml`.
+3. Wait for the Docker build and deployment to finish. Open the Render service
+   URL, typically `https://collaborative-todo-api.onrender.com`.
 
-The workflow builds Flutter with the repository's Pages path and embeds the
-Render API URL. The client uses HTTPS for REST and automatically connects to
-the corresponding secure WebSocket endpoint (`wss://.../ws`).
+The root `Dockerfile` builds the Flutter web app and packages it with the Node
+server. Express serves the Flutter files at `/`, REST endpoints at `/api`, and
+the WebSocket connection at `/ws` from the same origin. The frontend therefore
+does not need a separate API URL or cross-origin setup in production.
 
 **Free-host limitations:** Render Free services can sleep when idle and take
-time to wake on the next request. Their filesystem is ephemeral, so the SQLite
-database may be erased on restart or redeploy. This free configuration is
-suitable for a demo, not durable shared task storage. A persistent SQLite file
-requires a paid Render disk; alternatively, change the backend to a managed
-persistent database before choosing a free backend host. Display names are
-self-reported and the API currently has no authentication, so do not put
-sensitive tasks on the public demo.
+time to wake on the next request. The SQLite database is stored on the
+container's temporary filesystem and may be erased when the service restarts
+or redeploys. This is a demo deployment, not durable shared task storage. For
+persistent SQLite data, use a paid Render disk. Display names are self-reported
+and the API currently has no authentication, so do not put sensitive tasks on
+the public demo.
 
 ## Packages
 

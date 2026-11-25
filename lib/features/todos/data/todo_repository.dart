@@ -15,7 +15,9 @@ const _defaultApiBaseUrl = String.fromEnvironment(
 class TodoRepository {
   TodoRepository({http.Client? client, String apiBaseUrl = _defaultApiBaseUrl})
     : _client = client ?? http.Client(),
-      _apiBaseUrl = Uri.parse(apiBaseUrl);
+      _apiBaseUrl = apiBaseUrl == 'same-origin'
+          ? Uri.parse(Uri.base.origin)
+          : Uri.parse(apiBaseUrl);
 
   final http.Client _client;
   final Uri _apiBaseUrl;
